@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VSCO Web Clone</title>
+    <style>
+        :root {
+            --bg-color: #000;
+            --text-primary: #fff;
+            --text-secondary: #666;
+            --accent: #fff;
+            --border: #111;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 200;
+            letter-spacing: 8px;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-item {
+            font-size: 12px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s;
+            text-transform: uppercase;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        main {
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            justify-content: center;
+        }
+
+        .view {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Login View */
+        #login-view {
+            max-width: 400px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 48px;
+            font-weight: 100;
+            letter-spacing: 15px;
+            margin-bottom: 60px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #333;
+            color: #fff;
+            padding: 12px 0;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-bottom-color: #fff;
+        }
+
+        .btn-black {
+            width: 100%;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+
+        /* Feed View */
+        .feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .post-card {
+            margin-bottom: 20px;
+        }
+
+        .post-image-container {
+            width: 100%;
+            aspect-ratio: 4/5;
+            background: #0a0a0a;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .post-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .post-card:hover .post-image {
+            transform: scale(1.03);
+        }
+
+        .post-meta {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .post-info {
+            flex-grow: 1;
+        }
+
+        .post-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+
+        .like-btn:active {
+            transform: scale(1.2);
+        }
+
+        .likes-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .post-user {
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .post-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Studio View */
+        #studio-view {
+            max-width: 1000px;
+        }
+
+        .studio-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 40px;
+            background: #050505;
+            padding: 20px;
+            border: 1px solid #111;
+        }
+
+        .editor-canvas {
+            width: 100%;
+            aspect-ratio: 4/5;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .editor-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .filter-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .filter-card {
+            background: #111;
+            padding: 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .filter-card:hover {
+            background: #181818;
+        }
+
+        .filter-card.active {
+            border-color: #fff;
+            background: #222;
+        }
+
+        .filter-name {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .upload-placeholder {
+            border: 1px dashed #333;
+            padding: 100px 40px;
+            color: #444;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Search View */
+        .search-bar {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #111;
+            border: none;
+            padding: 20px;
+            color: #fff;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+
+        /* Profile View */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #222;
+            object-fit: cover;
+        }
+
+        .profile-info h2 {
+            font-weight: 200;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+            color: #666;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+
+        .profile-post {
+            aspect-ratio: 1;
+            background: #111;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .profile-post img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .studio-container { grid-template-columns: 1fr; }
+            .feed-grid { grid-template-columns: 1fr; }
+            .profile-header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="main-nav" style="display: none;">
+        <div class="nav-logo" onclick="switchView('feed-view')">VSCO</div>
+        <div class="nav-links">
+            <div class="nav-item active" onclick="switchView('feed-view')">Feed</div>
+            <div class="nav-item" onclick="switchView('studio-view')">Studio</div>
+            <div class="nav-item" onclick="switchView('search-view')">Search</div>
+            <div class="nav-item" onclick="switchView('profile-view')">Profile</div>
+        </div>
+        <div class="nav-item" onclick="logout()">Logout</div>
+    </nav>
+
+    <main>
+        <!-- LOGIN VIEW -->
+        <div id="login-view" class="view active">
+            <div class="login-logo">VSCO</div>
+            <div class="form-group">
+                <input type="text" placeholder="Email" id="email" value="user@vsco.com">
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="Password" id="pass" value="password">
+            </div>
+            <button class="btn-black" onclick="login()">Sign In</button>
+            <p style="font-size: 11px; color: #444; margin-top: 30px; letter-spacing: 1px;">
+                BY SIGNING IN, YOU AGREE TO OUR TERMS OF SERVICE
+            </p>
+        </div>
+
+        <!-- FEED VIEW -->
+        <div id="feed-view" class="view">
+            <div class="feed-grid" id="posts-container">
+                <!-- Posts will be injected here -->
+            </div>
+        </div>
+
+        <!-- STUDIO VIEW -->
+        <div id="studio-view" class="view">
+            <h2 style="font-weight: 200; letter-spacing: 5px; margin-bottom: 30px;">STUDIO</h2>
+            <div class="studio-container">
+                <div class="editor-canvas" id="canvas-container">
+                    <div class="upload-placeholder" onclick="document.getElementById('file-input').click()">
+                        CLICK TO IMPORT A PHOTO
+                    </div>
+                    <img id="main-editor-image" class="editor-image" style="display:none;">
+                    <input type="file" id="file-input" style="display:none" onchange="handleImageUpload(event)">
+                </div>
+                <div class="filter-panel">
+                    <div class="filter-card active" onclick="applyFilter('none', this)">
+                        <div class="filter-name">NONE</div>
+                    </div>
+                    <div class="filter-card" onclick="applyFilter('a6', this)">
+                        <div class="filter-name">A6</div>
+                        <div style="font-size: 9px; color: #666; margin-top: 5px;">WARM ANALOG</div>
+                    </div>
+                    <div class="filter-card" onclick="applyFilter('m5', this)">
+                        <div class="filter-name">M5</div>
+                        <div style="font-size: 9px; color: #666; margin-top: 5px;">MOODY BLUE</div>
+                    </div>
+                    <div class="filter-card" onclick="applyFilter('b1', this)">
+                        <div class="filter-name">B1</div>
+                        <div style="font-size: 9px; color: #666; margin-top: 5px;">CLASSIC B&W</div>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <input type="text" id="post-caption" placeholder="Write a caption..." style="border-bottom: 1px solid #222;">
+                    </div>
+                    <button class="btn-black" style="padding: 12px; font-size: 12px;" onclick="publishPost()">Publish</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCH VIEW -->
+        <div id="search-view" class="view">
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search people, images, journals..." onkeyup="filterSearch(this.value)">
+            </div>
+            <div class="feed-grid" id="search-results">
+                <!-- Search results injected here -->
+            </div>
+        </div>
+
+        <!-- PROFILE VIEW -->
+        <div id="profile-view" class="view">
+            <div class="profile-header">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde" class="profile-pic">
+                <div class="profile-info">
+                    <h2 id="profile-username">KAREL_VSCO</h2>
+                    <div class="profile-stats">
+                        <span><strong>0</strong> Posts</span>
+                        <span><strong>124</strong> Followers</span>
+                        <span><strong>89</strong> Following</span>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-grid" id="user-posts-grid">
+                <!-- User posts injected here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentFilter = 'none';
+        let allPosts = [];
+        let userPosts = [];
+
+        async function login() {
+            document.getElementById('login-view').classList.remove('active');
+            document.getElementById('main-nav').style.display = 'flex';
+            switchView('feed-view');
+            await loadPostsFromServer();
+        }
+
+        async function loadPostsFromServer() {
+            try {
+                const response = await fetch('/api/posts');
+                if (response.ok) {
+                    allPosts = await response.json();
+                    renderFeed(allPosts);
+                }
+            } catch (e) {
+                console.error("Error loading posts:", e);
+                // Fallback a datos estáticos si falla el servidor
+                initData();
+            }
+        }
+
+        function initData() {
+            if(allPosts.length === 0) {
+                allPosts = [
+                    { id: 1, username: 'arch_minimal', imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab', caption: 'Lines and shadows.' },
+                    { id: 2, username: 'desert_soul', imageUrl: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0', caption: 'Golden hour in the dunes.' }
+                ];
+            }
+            renderFeed(allPosts);
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(i => i.innerText.toLowerCase() === viewId.split('-')[0]);
+            if(activeNav) activeNav.classList.add('active');
+
+            if(viewId === 'profile-view') renderProfile();
+            if(viewId === 'search-view') renderSearch(allPosts);
+        }
+
+        function renderFeed(posts) {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = posts.map(post => `
+                <div class="post-card">
+                    <div class="post-image-container">
+                        <img src="${post.imageUrl}" class="post-image" style="filter: ${post.filter || 'none'}">
+                    </div>
+                    <div class="post-meta">
+                        <div class="post-info">
+                            <div class="post-user">${post.username}</div>
+                            <div class="post-desc">${post.caption}</div>
+                        </div>
+                        <div class="post-actions">
+                            <button class="like-btn" onclick="likePost(${post.id})">
+                                ${post.likes > 0 ? '♥' : '♡'}
+                            </button>
+                            <span class="likes-count">${post.likes} likes</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function likePost(id) {
+            try {
+                const response = await fetch(`/api/posts/${id}/like`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    await loadPostsFromServer();
+                }
+            } catch (e) {
+                console.error("Error liking post:", e);
+            }
+        }
+
+        function renderSearch(posts) {
+            const container = document.getElementById('search-results');
+            container.innerHTML = posts.map(post => `
+                <div class="post-card">
+                    <div class="post-image-container"><img src="${post.imageUrl}" class="post-image"></div>
+                </div>
+            `).join('');
+        }
+
+        function filterSearch(val) {
+            const filtered = allPosts.filter(p => p.username.toLowerCase().includes(val.toLowerCase()) || p.caption.toLowerCase().includes(val.toLowerCase()));
+            renderSearch(filtered);
+        }
+
+        function renderProfile() {
+            const grid = document.getElementById('user-posts-grid');
+            const myPosts = allPosts.filter(p => p.username === 'KAREL_VSCO');
+            document.querySelector('.profile-stats span strong').innerText = myPosts.length;
+            grid.innerHTML = myPosts.map(post => `
+                <div class="profile-post">
+                    <img src="${post.imageUrl}" style="filter: ${post.filter}">
+                </div>
+            `).join('');
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('main-editor-image');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.querySelector('.upload-placeholder').style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function applyFilter(filter, element) {
+            const img = document.getElementById('main-editor-image');
+            document.querySelectorAll('.filter-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+
+            switch(filter) {
+                case 'a6': currentFilter = 'sepia(0.3) contrast(1.1) brightness(1.1)'; break;
+                case 'm5': currentFilter = 'hue-rotate(180deg) saturate(0.8) contrast(1.2)'; break;
+                case 'b1': currentFilter = 'grayscale(1) contrast(1.2)'; break;
+                default: currentFilter = 'none';
+            }
+            img.style.filter = currentFilter;
+        }
+
+        async function publishPost() {
+            const img = document.getElementById('main-editor-image');
+            const caption = document.getElementById('post-caption').value;
+            
+            if(!img.src || img.style.display === 'none') {
+                alert('Please upload an image first');
+                return;
+            }
+
+            const newPost = {
+                username: 'KAREL_VSCO',
+                imageUrl: img.src,
+                caption: caption,
+                likes: 0,
+                filter: currentFilter
+            };
+
+            try {
+                const response = await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPost)
+                });
+
+                if (response.ok) {
+                    alert('Post published to database!');
+                    await loadPostsFromServer();
+                    switchView('feed-view');
+                    
+                    // Reset Studio
+                    img.style.display = 'none';
+                    document.querySelector('.upload-placeholder').style.display = 'block';
+                    document.getElementById('post-caption').value = '';
+                }
+            } catch (e) {
+                console.error("Error saving post:", e);
+                // Fallback local si el servidor falla
+                allPosts.unshift(newPost);
+                alert('Post published locally (Server error)!');
+                switchView('feed-view');
+                renderFeed(allPosts);
+            }
+        }
+
+        function logout() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
